@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Update this URL to your actual repo URL!
-                git 'https://github.com/YOUR_USERNAME/YOUR_REPO.git' 
+                git 'https://github.com/athoiba1/my-k8s-project.git' 
             }
         }
         // ... (paste the rest of the Build, Push, and Deploy stages) ...
