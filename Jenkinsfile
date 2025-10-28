@@ -43,15 +43,16 @@ pipeline {
         // -----------------------------------------------------------------
         stage('Push Image') {
             steps {
-                // Log in to Docker Hub using the 'docker-hub-creds' credential
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-creds') {
-                    
-                    echo "Pushing image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    docker.image("${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}").push()
-                }
+                // Add the script block here
+                script { 
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-creds') {
+                        
+                        echo "Pushing image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        docker.image("${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}").push()
+                    }
+                } // <-- Add the closing brace for the script block
             }
         }
-
         // -----------------------------------------------------------------
         // STAGE 4: Deploy to Kubernetes (You were missing this)
         // -----------------------------------------------------------------
@@ -82,3 +83,4 @@ pipeline {
         }
     } // <-- You were missing this
 } // <-- You were missing this
+
