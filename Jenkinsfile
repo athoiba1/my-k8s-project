@@ -6,7 +6,7 @@ pipeline {
 
     // Environment variables used throughout the pipeline
     environment {
-        // !!! This is correct! You've set it to "bakasensei" !!!
+        // --- Make sure this is still your Docker Hub username ---
         DOCKER_USERNAME = "bakasensei" 
         
         // The name of the image to build
@@ -18,19 +18,22 @@ pipeline {
 
     stages {
         // -----------------------------------------------------------------
-        // STAGE 1: Checkout Code (Your fix is correct)
+        // STAGE 1: Checkout Code
         // -----------------------------------------------------------------
         stage('Checkout') {
             steps {
+                // This checks out the code from the Git repo
+                // you configured in the Jenkins job.
                 checkout scm
             }
         }
 
         // -----------------------------------------------------------------
-        // STAGE 2: Build Docker Image (You were missing this)
+        // STAGE 2: Build Docker Image
         // -----------------------------------------------------------------
         stage('Build Image') {
             steps {
+                // This 'script' block is needed for the docker command
                 script {
                     echo "Building image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     docker.build("${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}")
@@ -39,22 +42,23 @@ pipeline {
         }
 
         // -----------------------------------------------------------------
-        // STAGE 3: Push Docker Image (You were missing this)
+        // STAGE 3: Push Docker Image
         // -----------------------------------------------------------------
         stage('Push Image') {
             steps {
-                // Add the script block here
+                // This 'script' block is needed for the withRegistry command
                 script { 
                     docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-creds') {
                         
                         echo "Pushing image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                         docker.image("${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}").push()
                     }
-                } // <-- Add the closing brace for the script block
+                }
             }
         }
+
         // -----------------------------------------------------------------
-        // STAGE 4: Deploy to Kubernetes (You were missing this)
+        // STAGE 4: Deploy to Kubernetes
         // -----------------------------------------------------------------
         stage('Deploy to K8s') {
             steps {
@@ -62,25 +66,27 @@ pipeline {
                 withKubeConfig([credentialsId: 'kubeconfig-creds']) {
                     
                     echo "Applying K8s deployment and service..."
-                    sh "kubectl apply -f deployment.yaml"
+                    // Use 'bat' for Windows commands
+                    bat "kubectl apply -f deployment.yaml"
                     
                     echo "Updating the deployment image to use the new build..."
-                    sh "kubectl set image deployment/${K8S_DEPLOYMENT_NAME} my-web-app-container=${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    // Use 'bat' for Windows commands
+                    bat "kubectl set image deployment/${K8S_DEPLOYMENT_NAME} my-web-app-container=${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     
                     echo "Deployment successful!"
                 }
             }
         }
-    } // <-- You were missing this
+    }
 
     // -----------------------------------------------------------------
-    // POST-BUILD ACTIONS
+    // POST-BUILD ACTIONS: Always run, regardless of success or failure
     // -----------------------------------------------------------------
     post {
         always {
             echo 'Pipeline finished. Cleaning up workspace...'
+            // Clean up the workspace to save disk space
             cleanWs()
         }
-    } // <-- You were missing this
-} // <-- You were missing this
-
+    }
+}
