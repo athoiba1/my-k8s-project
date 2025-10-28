@@ -8,10 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Update this URL to your actual repo URL!
-                git 'https://github.com/athoiba1/my-k8s-project.git' 
+                // This is the fix. It uses the branch from the job config.
+                checkout scm 
             }
         }
-        // ... (paste the rest of the Build, Push, and Deploy stages) ...
-    }
-}
